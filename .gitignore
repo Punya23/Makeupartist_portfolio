@@ -2,3 +2,4 @@
 node_modules/
 .compress/
 compress-tool/
+.vercel

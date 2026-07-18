@@ -9,26 +9,30 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Core Palette — Ivory, Charcoal, Gold */
-  --bg:          #0d0c0b;
-  --bg-2:        #141210;
-  --bg-3:        #1c1916;
-  --surface:     #1f1d19;
-  --surface-2:   #252219;
+  /* Core Palette — Jet Black, Gold */
+  --bg:          #000000;
+  --bg-2:        #000000;
+  --bg-3:        #000000;
+  --surface:     #0d0d0d;
+  --surface-2:   #1a1a1a;
 
   --gold:        #c9a96e;
   --gold-light:  #e2c58a;
   --gold-dim:    #8a6f45;
   --ivory:       #f5f0e8;
-  --ivory-dim:   #a89f90;
+  --ivory-dim:   #a8a8a8;
   --white:       #ffffff;
 
   --text-h:      #f5f0e8;
-  --text-p:      #b8ae9e;
-  --text-muted:  #6b6358;
+  --text-p:      #b3b3b3;
+  --text-muted:  #7a7a7a;
 
   --border:      rgba(201, 169, 110, 0.18);
   --border-dim:  rgba(201, 169, 110, 0.08);
+
+  --wine:        #4a1420;
+  --glass-bg:    rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(201, 169, 110, 0.15);
 
   /* Typography */
   --font-serif:  'Cormorant Garamond', Georgia, serif;
@@ -51,7 +55,16 @@
   --ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-html { scroll-behavior: smooth; }
+/* Native smooth-scroll is intentionally off — Lenis (motion.js) owns
+   scroll easing and intercepts anchor-link clicks via lenis.scrollTo().
+   This avoids the two smoothing systems fighting each other. */
+html { scroll-behavior: auto; }
+
+html.is-loading,
+html.is-loading body {
+  overflow: hidden;
+  height: 100%;
+}
 
 body {
   background: var(--bg);
@@ -61,6 +74,72 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ======= PRELOADER ======= */
+.preloader {
+  position: fixed; inset: 0; z-index: 10000;
+  background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1.4rem;
+}
+.preloader-inner {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: 120px; height: 120px;
+}
+.preloader-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+.preloader-ring-track {
+  fill: none; stroke: var(--border-dim); stroke-width: 1.5;
+}
+.preloader-ring-fill {
+  fill: none; stroke: var(--gold); stroke-width: 1.5; stroke-linecap: round;
+}
+.preloader-letter {
+  font-family: var(--font-serif);
+  font-size: 2.2rem; font-style: italic; color: var(--ivory);
+}
+.preloader-percent {
+  position: absolute; bottom: -2.2rem;
+  font-size: 0.7rem; letter-spacing: 0.16em; color: var(--text-muted);
+}
+.preloader-tagline {
+  margin-top: 1.4rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+/* ======= SCROLL PROGRESS ======= */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 9998;
+  background: transparent;
+  pointer-events: none;
+}
+.scroll-progress-bar {
+  height: 100%; width: 100%;
+  background: linear-gradient(to right, var(--gold-dim), var(--gold), var(--gold-light));
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* ======= GRAIN OVERLAY ======= */
+.grain-overlay {
+  position: fixed; inset: -10%; z-index: 9000;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grainShift 8s steps(6) infinite;
+}
+@keyframes grainShift {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-2%, 2%); }
+  40% { transform: translate(2%, -1%); }
+  60% { transform: translate(-1%, -2%); }
+  80% { transform: translate(1%, 2%); }
+  100% { transform: translate(0, 0); }
 }
 
 img { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -74,13 +153,15 @@ select, input, textarea { font-family: inherit; }
 ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 4px; }
 
 /* ======= CURSOR ======= */
+/* Position/scale are owned by motion.js (GSAP) via inline transform;
+   only non-transform properties are handled here. */
 .cursor {
   position: fixed; top: 0; left: 0; z-index: 9999;
   width: 8px; height: 8px; border-radius: 50%;
   background: var(--gold);
   pointer-events: none;
-  transform: translate(-50%, -50%);
-  transition: transform 0.1s, background 0.2s;
+  opacity: 0;
+  transition: background 0.2s;
   mix-blend-mode: difference;
 }
 .cursor-follower {
@@ -88,11 +169,31 @@ select, input, textarea { font-family: inherit; }
   width: 36px; height: 36px; border-radius: 50%;
   border: 1px solid rgba(201,169,110,0.5);
   pointer-events: none;
-  transform: translate(-50%, -50%);
-  transition: transform 0.35s var(--ease-out-expo), width 0.3s, height 0.3s, opacity 0.3s;
+  opacity: 0;
+  display: flex; align-items: center; justify-content: center;
+  /* opacity intentionally omitted — motion.js/GSAP owns the fade-in/out,
+     a CSS transition on the same property would fight its per-frame writes */
+  transition: width 0.3s, height 0.3s, background 0.3s;
 }
-.cursor.cursor--hover { transform: translate(-50%, -50%) scale(2); background: var(--gold-light); }
+.cursor.cursor--hover { background: var(--gold-light); }
 .cursor-follower.cursor-follower--hover { width: 56px; height: 56px; opacity: 0.4; }
+.cursor-follower.cursor-follower--label {
+  width: 92px; height: 92px; opacity: 1;
+  background: rgba(201, 169, 110, 0.12);
+  backdrop-filter: blur(6px);
+  border-color: var(--gold);
+}
+.cursor-label {
+  font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gold-light);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.cursor-follower--label .cursor-label { opacity: 1; }
+
+@media (hover: none), (pointer: coarse) {
+  .cursor, .cursor-follower { display: none; }
+}
 
 /* ======= NAV ======= */
 .nav {
@@ -102,7 +203,7 @@ select, input, textarea { font-family: inherit; }
   transition: background 0.4s, backdrop-filter 0.4s, padding 0.4s;
 }
 .nav.nav--scrolled {
-  background: rgba(13, 12, 11, 0.88);
+  background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(20px);
   padding: 1rem var(--gutter);
   border-bottom: 1px solid var(--border-dim);
@@ -210,7 +311,6 @@ select, input, textarea { font-family: inherit; }
 }
 .btn-primary:hover {
   background: var(--gold-light);
-  transform: translateY(-2px);
   box-shadow: 0 8px 32px rgba(201,169,110,0.25);
 }
 .btn-ghost {
@@ -224,7 +324,7 @@ select, input, textarea { font-family: inherit; }
   text-transform: uppercase;
   transition: border-color 0.25s, color 0.25s, transform 0.2s;
 }
-.btn-ghost:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
 .btn-full { width: 100%; justify-content: center; }
 
 /* ======= HERO ======= */
@@ -249,6 +349,12 @@ select, input, textarea { font-family: inherit; }
   content: '';
   position: absolute; inset: 0;
   background: radial-gradient(ellipse 60% 70% at 60% 50%, transparent 30%, var(--bg) 100%);
+}
+.hero-canvas {
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  opacity: 0;
 }
 
 /* Hero Content */
@@ -275,24 +381,21 @@ select, input, textarea { font-family: inherit; }
 }
 .hero-name-line {
   display: block;
-  animation: slideUp 1s var(--ease-out-expo) both;
+  overflow: hidden;
+  padding-bottom: 0.05em;
 }
-.hero-name-line:nth-child(2) { animation-delay: 0.1s; }
 .hero-name-line.italic { font-style: italic; color: var(--gold); }
 .hero-tagline {
   font-size: 1rem;
   color: var(--ivory-dim);
   line-height: 1.7;
-  animation: fadeIn 1.2s 0.4s both;
 }
 .hero-actions {
   display: flex; gap: 1rem; flex-wrap: wrap;
-  animation: fadeIn 1.2s 0.6s both;
 }
 .hero-stats {
   display: flex; align-items: center; gap: 2rem;
   margin-top: 1rem;
-  animation: fadeIn 1.2s 0.8s both;
 }
 .stat { display: flex; flex-direction: column; gap: 0.2rem; }
 .stat-num-row { display: flex; align-items: baseline; gap: 2px; }
@@ -388,8 +491,8 @@ select, input, textarea { font-family: inherit; }
 .ticker-track {
   display: flex; gap: 3rem; align-items: center;
   width: max-content;
-  animation: ticker 30s linear infinite;
   white-space: nowrap;
+  will-change: transform;
 }
 .ticker-track span {
   font-size: 0.75rem;
@@ -443,6 +546,7 @@ select, input, textarea { font-family: inherit; }
   border-radius: var(--r-md);
   cursor: pointer;
   transition: opacity 0.4s;
+  will-change: transform;
 }
 .gallery-item.gi-tall { grid-row: span 2; }
 .gallery-item.gi-wide { grid-column: span 2; }
@@ -462,7 +566,7 @@ select, input, textarea { font-family: inherit; }
 
 .gallery-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(13,12,11,0.8) 0%, transparent 55%);
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 55%);
   display: flex; align-items: flex-end; justify-content: space-between;
   padding: 1.2rem 1rem;
   opacity: 0;
@@ -503,17 +607,18 @@ select, input, textarea { font-family: inherit; }
   border-radius: var(--r-lg);
   overflow: hidden;
   cursor: pointer;
+  will-change: transform;
 }
 .reel-video {
   width: 100%; height: 100%; object-fit: cover;
 }
 .video-overlay {
   position: absolute; inset: 0;
-  background: rgba(13,12,11,0.35);
+  background: rgba(0,0,0,0.35);
   display: flex; align-items: center; justify-content: center;
   transition: background 0.3s;
 }
-.video-item:hover .video-overlay { background: rgba(13,12,11,0.15); }
+.video-item:hover .video-overlay { background: rgba(0,0,0,0.15); }
 .video-item.playing .video-overlay { background: transparent; pointer-events: none; }
 .play-btn {
   width: 3.5rem; height: 3.5rem;
@@ -529,11 +634,35 @@ select, input, textarea { font-family: inherit; }
   position: absolute; bottom: 1rem; left: 1rem;
   font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--ivory);
-  background: rgba(13,12,11,0.6);
+  background: rgba(0,0,0,0.6);
   backdrop-filter: blur(8px);
   padding: 0.35rem 0.8rem;
   border-radius: var(--r-pill);
 }
+
+/* ======= SIGNATURE SCENE ======= */
+.signature-scene {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 45%, rgba(74,20,32,0.28), transparent 70%),
+    var(--bg);
+}
+.signature-canvas {
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+.signature-caption {
+  position: relative; z-index: 2;
+  text-align: center;
+  max-width: 40rem;
+  padding: 0 var(--gutter);
+}
+.signature-caption .section-label { justify-content: center; }
+.signature-caption .section-title { font-size: clamp(2.2rem, 4.5vw, 3.6rem); }
 
 /* ======= SERVICES ======= */
 .services {
@@ -567,8 +696,9 @@ select, input, textarea { font-family: inherit; }
   border-radius: var(--r-xl);
   padding: 2.5rem 2rem;
   display: flex; flex-direction: column; gap: 1rem;
-  transition: border-color 0.3s, transform 0.3s, background 0.3s;
+  transition: border-color 0.3s, background 0.3s;
   overflow: hidden;
+  will-change: transform;
 }
 .service-card::before {
   content: '';
@@ -577,7 +707,7 @@ select, input, textarea { font-family: inherit; }
   background: linear-gradient(to right, transparent, var(--gold), transparent);
   opacity: 0; transition: opacity 0.4s;
 }
-.service-card:hover { border-color: var(--border); transform: translateY(-6px); background: var(--surface-2); }
+.service-card:hover { border-color: var(--border); background: var(--surface-2); }
 .service-card:hover::before { opacity: 1; }
 
 .service-num {
@@ -888,7 +1018,7 @@ select, input, textarea { font-family: inherit; }
 /* ======= LIGHTBOX ======= */
 .lightbox {
   position: fixed; inset: 0; z-index: 999;
-  background: rgba(13,12,11,0.96);
+  background: rgba(0,0,0,0.96);
   backdrop-filter: blur(20px);
   display: none;
   align-items: center; justify-content: center;
@@ -942,18 +1072,6 @@ select, input, textarea { font-family: inherit; }
 }
 
 /* ======= ANIMATIONS ======= */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(60px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes ticker {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
 @keyframes scrollLineAnim {
   from { left: -100%; }
   to { left: 100%; }
@@ -966,20 +1084,6 @@ select, input, textarea { font-family: inherit; }
   0%, 100% { opacity: 0; transform: translateX(0); }
   40%, 60% { opacity: 1; transform: translateX(4px); }
 }
-
-/* Reveal on scroll */
-.reveal {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
-}
-.reveal.revealed {
-  opacity: 1;
-  transform: none;
-}
-.reveal-delay-1 { transition-delay: 0.1s; }
-.reveal-delay-2 { transition-delay: 0.2s; }
-.reveal-delay-3 { transition-delay: 0.3s; }
 
 /* ======= RESPONSIVE ======= */
 
@@ -1140,7 +1244,7 @@ select, input, textarea { font-family: inherit; }
   .gallery-item.gi-tall { grid-row: span 2; }
   .gallery-item.gi-wide { grid-column: span 2; }
   .gallery-item { border-radius: var(--r-md); }
-  .gallery-overlay { opacity: 1; background: linear-gradient(to top, rgba(13,12,11,0.7) 0%, transparent 60%); }
+  .gallery-overlay { opacity: 1; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%); }
 
   /* VIDEO REELS */
   .video-reel-section { margin-top: 3rem; }
@@ -1243,4 +1347,24 @@ select, input, textarea { font-family: inherit; }
   .hero-title { font-size: 3.4rem; }
   .gallery-puzzle { grid-auto-rows: 44vw; }
   .video-item { flex: 0 0 82vw; }
+}
+
+/* --- Small-screen preloader/signature tweaks --- */
+@media (max-width: 600px) {
+  .preloader-inner { width: 96px; height: 96px; }
+  .preloader-ring { width: 96px; height: 96px; }
+  .preloader-letter { font-size: 1.8rem; }
+  .signature-scene { min-height: 80svh; }
+}
+
+/* --- Reduced motion: disable decorative/continuous CSS animation --- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .grain-overlay { display: none; }
+  .scroll-line::after { animation: none; }
+  .hero-canvas, .signature-canvas { display: none; }
+  /* Belt-and-suspenders: motion.js already never reveals these (they stay
+     at their opacity:0 default) since setupCursor() only runs on the full
+     GSAP path — this just makes that explicit at the CSS layer too. */
+  .cursor, .cursor-follower { display: none; }
 }

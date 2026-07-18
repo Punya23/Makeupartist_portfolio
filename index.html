@@ -17,9 +17,39 @@
 </head>
 <body>
 
+  <!-- PRELOADER -->
+  <div id="preloader" class="preloader" role="status" aria-label="Loading Dhruvi Surana portfolio">
+    <div class="preloader-inner">
+      <svg class="preloader-ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+        <circle class="preloader-ring-track" cx="60" cy="60" r="54" />
+        <circle class="preloader-ring-fill" id="preloader-ring-fill" cx="60" cy="60" r="54" />
+      </svg>
+      <span class="preloader-letter">D</span>
+      <span class="preloader-percent" id="preloader-percent" aria-hidden="true">0%</span>
+    </div>
+    <p class="preloader-tagline">Where artistry meets elegance</p>
+  </div>
+  <noscript><style>#preloader{display:none!important}html.is-loading{overflow:visible!important;height:auto!important}</style></noscript>
+  <script>
+    // Safety net: if js/motion.js never runs at all (blocked, 404, no ES
+    // module support) the preloader/scroll-lock would otherwise never
+    // clear, since motion.js is the only thing that removes them.
+    setTimeout(function () {
+      document.documentElement.classList.remove('is-loading');
+      var p = document.getElementById('preloader');
+      if (p) p.style.display = 'none';
+    }, 6000);
+  </script>
+
+  <!-- SCROLL PROGRESS -->
+  <div class="scroll-progress" aria-hidden="true"><div class="scroll-progress-bar" id="scroll-progress-bar"></div></div>
+
+  <!-- GRAIN -->
+  <div class="grain-overlay" aria-hidden="true"></div>
+
   <!-- CURSOR -->
-  <div id="cursor" class="cursor"></div>
-  <div id="cursor-follower" class="cursor-follower"></div>
+  <div id="cursor" class="cursor" aria-hidden="true"></div>
+  <div id="cursor-follower" class="cursor-follower" aria-hidden="true"><span class="cursor-label" id="cursor-label"></span></div>
 
   <!-- NAV -->
   <nav id="nav" class="nav">
@@ -32,7 +62,7 @@
       <li><a href="#about" class="nav-link">About</a></li>
       <li><a href="#contact" class="nav-link">Contact</a></li>
     </ul>
-    <a href="#contact" class="nav-cta" id="nav-cta">Book Now</a>
+    <a href="#contact" class="nav-cta magnetic" id="nav-cta">Book Now</a>
     <button class="hamburger" id="hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -51,6 +81,7 @@
   <!-- HERO -->
   <section id="hero" class="hero">
     <div class="hero-bg-grid"></div>
+    <canvas id="hero-canvas" class="hero-canvas" aria-hidden="true"></canvas>
 
     <div class="hero-media-col">
       <div class="hero-img-wrap hero-img-top" data-parallax="0.12">
@@ -76,8 +107,8 @@
       </h1>
       <p class="hero-tagline" data-reveal>Where artistry meets elegance.<br/>Every look, a masterpiece.</p>
       <div class="hero-actions" data-reveal>
-        <a href="#portfolio" class="btn-primary" id="hero-cta-portfolio">View Portfolio</a>
-        <a href="#contact" class="btn-ghost" id="hero-cta-book">Book a Session</a>
+        <a href="#portfolio" class="btn-primary magnetic" id="hero-cta-portfolio">View Portfolio</a>
+        <a href="#contact" class="btn-ghost magnetic" id="hero-cta-book">Book a Session</a>
       </div>
       <div class="hero-stats">
         <div class="stat">
@@ -142,7 +173,7 @@
     <div class="gallery-puzzle" id="gallery-grid">
 
       <!-- ROW 1: tall | square | square -->
-      <div class="gallery-item gi-tall" data-cat="bridal" data-index="0">
+      <div class="gallery-item gi-tall" data-cat="bridal" data-cursor-label="View" data-index="0">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG-20260617-WA0069~2.webp"
                alt="Red bridal lehenga full look"
@@ -155,7 +186,7 @@
         </div>
       </div>
 
-      <div class="gallery-item gi-sq" data-cat="hair" data-index="1">
+      <div class="gallery-item gi-sq" data-cat="hair" data-cursor-label="View" data-index="1">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG-20260617-WA0027.webp"
                alt="Bridal updo with red roses and pearl chains"
@@ -168,7 +199,7 @@
         </div>
       </div>
 
-      <div class="gallery-item gi-sq" data-cat="festive" data-index="2">
+      <div class="gallery-item gi-sq" data-cat="festive" data-cursor-label="View" data-index="2">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG_20251122_102337260.webp"
                alt="Orange festive bridal look"
@@ -182,7 +213,7 @@
       </div>
 
       <!-- ROW 2: wide | square -->
-      <div class="gallery-item gi-wide" data-cat="hair" data-index="3">
+      <div class="gallery-item gi-wide" data-cat="hair" data-cursor-label="View" data-index="3">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG-20260617-WA0065.webp"
                alt="Blue gown with tiara and cascading curls"
@@ -195,7 +226,7 @@
         </div>
       </div>
 
-      <div class="gallery-item gi-sq" data-cat="bridal" data-index="4">
+      <div class="gallery-item gi-sq" data-cat="bridal" data-cursor-label="View" data-index="4">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG_20251123_111700005.webp"
                alt="Bridal in maroon lehenga outdoor"
@@ -209,7 +240,7 @@
       </div>
 
       <!-- ROW 3: square | square | tall -->
-      <div class="gallery-item gi-sq" data-cat="hair" data-index="5">
+      <div class="gallery-item gi-sq" data-cat="hair" data-cursor-label="View" data-index="5">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG_20251123_100703780.webp"
                alt="Half-up butterfly hair with florals"
@@ -222,7 +253,7 @@
         </div>
       </div>
 
-      <div class="gallery-item gi-sq" data-cat="festive" data-index="6">
+      <div class="gallery-item gi-sq" data-cat="festive" data-cursor-label="View" data-index="6">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG-20260617-WA0079.webp"
                alt="Festive bridal look with maang tikka"
@@ -235,7 +266,7 @@
         </div>
       </div>
 
-      <div class="gallery-item gi-tall" data-cat="hair" data-index="7">
+      <div class="gallery-item gi-tall" data-cat="hair" data-cursor-label="View" data-index="7">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG-20260617-WA0067.webp"
                alt="Butterfly clips in flowing dark hair"
@@ -249,7 +280,7 @@
       </div>
 
       <!-- ROW 4: sq | wide -->
-      <div class="gallery-item gi-sq" data-cat="bridal" data-index="8">
+      <div class="gallery-item gi-sq" data-cat="bridal" data-cursor-label="View" data-index="8">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG-20260617-WA0082.webp"
                alt="Bridal orange saree with maang tikka close-up"
@@ -262,7 +293,7 @@
         </div>
       </div>
 
-      <div class="gallery-item gi-wide" data-cat="hair" data-index="9">
+      <div class="gallery-item gi-wide" data-cat="hair" data-cursor-label="View" data-index="9">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG_20251123_111735949.webp"
                alt="Half-up half-down bridal hairstyle"
@@ -276,7 +307,7 @@
       </div>
 
       <!-- ROW 5: tall | sq | sq -->
-      <div class="gallery-item gi-tall" data-cat="bridal" data-index="10">
+      <div class="gallery-item gi-tall" data-cat="bridal" data-cursor-label="View" data-index="10">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/SANM6257.webp"
                alt="Bridal in purple drape saree"
@@ -289,7 +320,7 @@
         </div>
       </div>
 
-      <div class="gallery-item gi-sq" data-cat="festive" data-index="11">
+      <div class="gallery-item gi-sq" data-cat="festive" data-cursor-label="View" data-index="11">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG-20260617-WA0063.webp"
                alt="Cream and gold festive look"
@@ -302,7 +333,7 @@
         </div>
       </div>
 
-      <div class="gallery-item gi-sq" data-cat="hair" data-index="12">
+      <div class="gallery-item gi-sq" data-cat="hair" data-cursor-label="View" data-index="12">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG-20260617-WA0066.webp"
                alt="Floral hair with orchids and baby's breath"
@@ -316,7 +347,7 @@
       </div>
 
       <!-- ROW 6: sq | sq | wide -->
-      <div class="gallery-item gi-sq" data-cat="festive" data-index="13">
+      <div class="gallery-item gi-sq" data-cat="festive" data-cursor-label="View" data-index="13">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG-20260617-WA0080.webp"
                alt="Festive look warm tones"
@@ -329,7 +360,7 @@
         </div>
       </div>
 
-      <div class="gallery-item gi-sq" data-cat="festive" data-index="14">
+      <div class="gallery-item gi-sq" data-cat="festive" data-cursor-label="View" data-index="14">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG_20240709_095818822~2.webp"
                alt="Festive glam look close-up"
@@ -342,7 +373,7 @@
         </div>
       </div>
 
-      <div class="gallery-item gi-wide" data-cat="hair" data-index="15">
+      <div class="gallery-item gi-wide" data-cat="hair" data-cursor-label="View" data-index="15">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG-20260617-WA0028.webp"
                alt="Half-up bridal hairstyle with crystals"
@@ -356,7 +387,7 @@
       </div>
 
       <!-- ROW 7: sq | sq | sq -->
-      <div class="gallery-item gi-sq" data-cat="bridal" data-index="16">
+      <div class="gallery-item gi-sq" data-cat="bridal" data-cursor-label="View" data-index="16">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG-20260617-WA0081.webp"
                alt="Party glam makeup look"
@@ -369,7 +400,7 @@
         </div>
       </div>
 
-      <div class="gallery-item gi-sq" data-cat="bridal" data-index="17">
+      <div class="gallery-item gi-sq" data-cat="bridal" data-cursor-label="View" data-index="17">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG-20260617-WA0075.webp"
                alt="Red dupatta bridal look"
@@ -382,7 +413,7 @@
         </div>
       </div>
 
-      <div class="gallery-item gi-sq" data-cat="bts" data-index="18">
+      <div class="gallery-item gi-sq" data-cat="bts" data-cursor-label="View" data-index="18">
         <div class="gallery-img-wrap">
           <img src="assets/Makeup and hair by Dhruvi Surana/IMG_20250316_111120501.webp"
                alt="Behind the scenes at work"
@@ -404,34 +435,43 @@
         <h3 class="section-title-sm">In Motion</h3>
       </div>
       <div class="video-grid">
-        <div class="video-item" data-index="0">
+        <div class="video-item" data-cursor-label="Play" data-index="0">
           <video src="assets/Makeup and hair by Dhruvi Surana/InShot_20250317_075511386.mp4#t=0.001" preload="metadata" muted loop playsinline class="reel-video" id="video-0"></video>
           <div class="video-overlay">
-            <button class="play-btn" aria-label="Play video">
+            <button class="play-btn magnetic" aria-label="Play video">
               <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </button>
           </div>
           <span class="video-label">Bridal Transformation</span>
         </div>
-        <div class="video-item" data-index="1">
+        <div class="video-item" data-cursor-label="Play" data-index="1">
           <video src="assets/Makeup and hair by Dhruvi Surana/InShot_20250318_191754322.mp4#t=0.001" preload="metadata" muted loop playsinline class="reel-video" id="video-1"></video>
           <div class="video-overlay">
-            <button class="play-btn" aria-label="Play video">
+            <button class="play-btn magnetic" aria-label="Play video">
               <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </button>
           </div>
           <span class="video-label">Hair Styling Reel</span>
         </div>
-        <div class="video-item" data-index="2">
+        <div class="video-item" data-cursor-label="Play" data-index="2">
           <video src="assets/Makeup and hair by Dhruvi Surana/InShot_20260617_150427151.mp4#t=0.001" preload="metadata" muted loop playsinline class="reel-video" id="video-2"></video>
           <div class="video-overlay">
-            <button class="play-btn" aria-label="Play video">
+            <button class="play-btn magnetic" aria-label="Play video">
               <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </button>
           </div>
           <span class="video-label">Making of a Bride</span>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- SIGNATURE -->
+  <section class="signature-scene" id="signature">
+    <canvas id="signature-canvas" class="signature-canvas" aria-hidden="true"></canvas>
+    <div class="signature-caption">
+      <p class="section-label">The Craft</p>
+      <h2 class="section-title">Precision. Passion. <em>Perfection.</em></h2>
     </div>
   </section>
 
@@ -560,7 +600,7 @@
           <span>Available for destination weddings</span>
         </div>
       </div>
-      <a href="#contact" class="btn-primary" id="about-cta">Work With Me</a>
+      <a href="#contact" class="btn-primary magnetic" id="about-cta">Work With Me</a>
     </div>
   </section>
 
@@ -628,8 +668,8 @@
           </div>
         </div>
       </div>
-      <button class="testimonial-prev" id="testimonial-prev" aria-label="Previous">‹</button>
-      <button class="testimonial-next" id="testimonial-next" aria-label="Next">›</button>
+      <button class="testimonial-prev magnetic" id="testimonial-prev" aria-label="Previous">‹</button>
+      <button class="testimonial-next magnetic" id="testimonial-next" aria-label="Next">›</button>
     </div>
     <div class="testimonial-dots" id="testimonial-dots">
       <button class="t-dot active" aria-label="Testimonial 1"></button>
@@ -676,15 +716,15 @@
         </div>
       </div>
       <div class="social-links">
-        <a href="https://wa.me/919730143329" class="social-link" id="social-whatsapp" aria-label="WhatsApp" target="_blank" rel="noopener">
+        <a href="https://wa.me/919730143329" class="social-link magnetic" id="social-whatsapp" aria-label="WhatsApp" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
           WhatsApp
         </a>
-        <a href="#" class="social-link" id="social-instagram" aria-label="Instagram">
+        <a href="#" class="social-link magnetic" id="social-instagram" aria-label="Instagram">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
           Instagram
         </a>
-        <a href="#" class="social-link" id="social-facebook" aria-label="Facebook">
+        <a href="#" class="social-link magnetic" id="social-facebook" aria-label="Facebook">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
           Facebook
         </a>
@@ -727,7 +767,7 @@
           <label for="message">Tell Me About Your Vision</label>
           <textarea id="message" name="message" rows="4" placeholder="Describe your dream look, inspiration, or any specific requirements..."></textarea>
         </div>
-        <button type="submit" class="btn-primary btn-full" id="form-submit">Send Message</button>
+        <button type="submit" class="btn-primary btn-full magnetic" id="form-submit">Send Message</button>
         <div class="form-success" id="form-success">
           ✓ Message sent! I'll get back to you within 24 hours.
         </div>
@@ -763,9 +803,18 @@
     <div class="lightbox-inner">
       <img src="" alt="" id="lightbox-img" />
     </div>
-    <div class="lightbox-counter" id="lightbox-counter">1 / 16</div>
+    <div class="lightbox-counter" id="lightbox-counter">1 / 19</div>
   </div>
 
+  <script type="importmap">
+  { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+  <script type="module" src="js/hero-scene.js"></script>
+  <script type="module" src="js/motion.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

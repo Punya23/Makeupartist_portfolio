@@ -5,45 +5,8 @@
 
 'use strict';
 
-/* --------- CURSOR --------- */
-(function initCursor() {
-  const cursor = document.getElementById('cursor');
-  const follower = document.getElementById('cursor-follower');
-  if (!cursor || !follower) return;
-
-  let mx = 0, my = 0, fx = 0, fy = 0;
-
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    cursor.style.left = mx + 'px';
-    cursor.style.top = my + 'px';
-  });
-
-  function animateFollower() {
-    fx += (mx - fx) * 0.1;
-    fy += (my - fy) * 0.1;
-    follower.style.left = fx + 'px';
-    follower.style.top = fy + 'px';
-    requestAnimationFrame(animateFollower);
-  }
-  animateFollower();
-
-  const hoverEls = document.querySelectorAll('a, button, .gallery-item, .video-item, .service-card');
-  hoverEls.forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      cursor.classList.add('cursor--hover');
-      follower.classList.add('cursor-follower--hover');
-    });
-    el.addEventListener('mouseleave', () => {
-      cursor.classList.remove('cursor--hover');
-      follower.classList.remove('cursor-follower--hover');
-    });
-  });
-
-  document.addEventListener('mouseleave', () => { cursor.style.opacity = '0'; follower.style.opacity = '0'; });
-  document.addEventListener('mouseenter', () => { cursor.style.opacity = '1'; follower.style.opacity = '1'; });
-})();
-
+/* Cursor, scroll-reveal, stat counters, and hero parallax are handled by
+   js/motion.js (GSAP) — this file owns functional/content behavior only. */
 
 /* --------- NAV --------- */
 (function initNav() {
@@ -58,88 +21,19 @@
 
   if (hamburger && mobileMenu) {
     hamburger.addEventListener('click', () => {
+      const opening = !mobileMenu.classList.contains('open');
       mobileMenu.classList.toggle('open');
-      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+      document.body.style.overflow = opening ? 'hidden' : '';
+      if (opening) window.DhruviMotion?.stop(); else window.DhruviMotion?.start();
     });
     mmLinks.forEach(link => {
       link.addEventListener('click', () => {
         mobileMenu.classList.remove('open');
         document.body.style.overflow = '';
+        window.DhruviMotion?.start();
       });
     });
   }
-})();
-
-
-/* --------- REVEAL ON SCROLL --------- */
-(function initReveal() {
-  const sections = document.querySelectorAll(
-    '.section-header, .service-card, .about-content > *, .about-media, .contact-left > *, .contact-right, .video-item, .gallery-item'
-  );
-
-  sections.forEach((el, i) => {
-    el.classList.add('reveal');
-    const delay = Math.min(i % 4, 3);
-    if (delay > 0) el.classList.add(`reveal-delay-${delay}`);
-  });
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('revealed');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
-
-  sections.forEach(el => observer.observe(el));
-})();
-
-
-/* --------- STAT COUNTER --------- */
-(function initCounters() {
-  const stats = document.querySelectorAll('.stat-num[data-count]');
-
-  function animateCounter(el) {
-    const target = parseInt(el.getAttribute('data-count'));
-    const duration = 1800;
-    const start = performance.now();
-    function update(now) {
-      const progress = Math.min((now - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 4);
-      el.textContent = Math.round(ease * target);
-      if (progress < 1) requestAnimationFrame(update);
-    }
-    requestAnimationFrame(update);
-  }
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        animateCounter(entry.target);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.5 });
-
-  stats.forEach(el => observer.observe(el));
-})();
-
-
-/* --------- PARALLAX HERO --------- */
-(function initParallax() {
-  const images = document.querySelectorAll('[data-parallax]');
-  if (!images.length) return;
-
-  function applyParallax() {
-    const scrollY = window.scrollY;
-    images.forEach(img => {
-      const factor = parseFloat(img.getAttribute('data-parallax'));
-      img.style.transform = `translateY(${scrollY * factor}px)`;
-    });
-  }
-
-  window.addEventListener('scroll', applyParallax, { passive: true });
 })();
 
 
@@ -147,6 +41,7 @@
 (function initFilter() {
   const buttons = document.querySelectorAll('.filter-btn');
   const items = document.querySelectorAll('.gallery-item');
+  const hasGsap = typeof window.gsap !== 'undefined';
 
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -159,10 +54,23 @@
         const visible = filter === 'all' || cat === filter;
         if (visible) {
           item.style.display = '';
-          // trigger reflow for animation
-          requestAnimationFrame(() => {
-            item.style.opacity = '1';
-            item.style.transform = 'scale(1)';
+          if (hasGsap) {
+            // Routed through GSAP (not raw style writes) so it shares the
+            // same transform cache as motion.js's tilt-on-hover effect on
+            // these same items — otherwise a mousemove mid-transition can
+            // clobber this scale back to whatever GSAP cached.
+            gsap.to(item, { opacity: 1, scale: 1, duration: 0.4, overwrite: 'auto' });
+          } else {
+            // trigger reflow for animation
+            requestAnimationFrame(() => {
+              item.style.opacity = '1';
+              item.style.transform = 'scale(1)';
+            });
+          }
+        } else if (hasGsap) {
+          gsap.to(item, {
+            opacity: 0, scale: 0.95, duration: 0.4, overwrite: 'auto',
+            onComplete: () => { item.style.display = 'none'; },
           });
         } else {
           item.style.opacity = '0';
@@ -172,6 +80,11 @@
           }, 400);
         }
       });
+
+      // Filtering changes document height (hidden items collapse out of
+      // the grid), which leaves every ScrollTrigger below the gallery
+      // (signature pin, services, about, etc.) pinned to stale offsets.
+      setTimeout(() => window.ScrollTrigger?.refresh(), 450);
     });
   });
 })();
@@ -205,6 +118,7 @@
     show();
     lightbox.classList.add('open');
     document.body.style.overflow = 'hidden';
+    window.DhruviMotion?.stop();
   }
 
   function show() {
@@ -219,10 +133,20 @@
   function close() {
     lightbox.classList.remove('open');
     document.body.style.overflow = '';
+    window.DhruviMotion?.start();
   }
 
-  document.querySelectorAll('.gallery-item').forEach((item, idx) => {
-    item.addEventListener('click', () => openLightbox(idx));
+  document.querySelectorAll('.gallery-item').forEach((item) => {
+    item.addEventListener('click', () => {
+      // buildImageList()/openLightbox() index into the currently VISIBLE
+      // (post-filter) items only, not full DOM order — using a fixed
+      // forEach index here would open the wrong photo (or nothing) once
+      // any filter other than "All" is active.
+      const visible = Array.from(document.querySelectorAll('.gallery-item:not([style*="display: none"])'));
+      const idx = visible.indexOf(item);
+      if (idx === -1) return;
+      openLightbox(idx);
+    });
   });
 
   lbClose && lbClose.addEventListener('click', close);
@@ -370,6 +294,7 @@
       btn.disabled = false;
       if (success) {
         success.classList.add('visible');
+        window.DhruviMotion?.playFormSuccess();
         setTimeout(() => success.classList.remove('visible'), 5000);
       }
     }, 1500);
